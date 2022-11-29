@@ -20,9 +20,5 @@ message BranchRequest {
 
 // Branch response message
 message BranchReply {
-  string type = 1;
-  float balance = 2;
-  string interface = 3;
-  float money = 4;
-  int32 id = 5;
+  int32 status = 1;
 }
