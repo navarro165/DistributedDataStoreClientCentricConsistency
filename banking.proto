@@ -16,9 +16,14 @@ message BranchRequest {
   string interface = 3;
   float money = 4;
   int32 id = 5;
+  int32 event_id = 6;
+  int32 customer_id = 7;
+  bool request_balance = 8;
 }
 
 // Branch response message
 message BranchReply {
   int32 status = 1;
+  string write_sets = 2;
+  float balance = 3;
 }
