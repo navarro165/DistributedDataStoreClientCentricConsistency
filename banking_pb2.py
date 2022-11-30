@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rbanking.proto\x12\x07\x62\x61nking\"\x9c\x01\n\rBranchRequest\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x02\x12\x11\n\tinterface\x18\x03 \x01(\t\x12\r\n\x05money\x18\x04 \x01(\x02\x12\n\n\x02id\x18\x05 \x01(\x05\x12\x10\n\x08\x65vent_id\x18\x06 \x01(\x05\x12\x13\n\x0b\x63ustomer_id\x18\x07 \x01(\x05\x12\x17\n\x0frequest_balance\x18\x08 \x01(\x08\"B\n\x0b\x42ranchReply\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x12\n\nwrite_sets\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x02\x32G\n\x06\x42ranch\x12=\n\x0bMsgDelivery\x12\x16.banking.BranchRequest\x1a\x14.banking.BranchReply\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rbanking.proto\x12\x07\x62\x61nking\"\x98\x01\n\rBranchRequest\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x02\x12\x11\n\tinterface\x18\x03 \x01(\t\x12\r\n\x05money\x18\x04 \x01(\x02\x12\n\n\x02id\x18\x05 \x01(\x05\x12\x10\n\x08\x65vent_id\x18\x06 \x01(\x05\x12\x13\n\x0b\x63ustomer_id\x18\x07 \x01(\x05\x12\x13\n\x0bread_writes\x18\x08 \x01(\x08\"B\n\x0b\x42ranchReply\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x12\n\nwrite_sets\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x02\x32G\n\x06\x42ranch\x12=\n\x0bMsgDelivery\x12\x16.banking.BranchRequest\x1a\x14.banking.BranchReply\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'banking_pb2', globals())
@@ -21,9 +21,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _BRANCHREQUEST._serialized_start=27
-  _BRANCHREQUEST._serialized_end=183
-  _BRANCHREPLY._serialized_start=185
-  _BRANCHREPLY._serialized_end=251
-  _BRANCH._serialized_start=253
-  _BRANCH._serialized_end=324
+  _BRANCHREQUEST._serialized_end=179
+  _BRANCHREPLY._serialized_start=181
+  _BRANCHREPLY._serialized_end=247
+  _BRANCH._serialized_start=249
+  _BRANCH._serialized_end=320
 # @@protoc_insertion_point(module_scope)

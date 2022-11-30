@@ -18,7 +18,7 @@ message BranchRequest {
   int32 id = 5;
   int32 event_id = 6;
   int32 customer_id = 7;
-  bool request_balance = 8;
+  bool read_writes = 8;
 }
 
 // Branch response message
