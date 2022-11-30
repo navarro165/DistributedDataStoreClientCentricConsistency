@@ -29,8 +29,8 @@ python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. banking.proto
 
 To test run the system, `cd` into the repository directory and run the following command:<br> `python -m main`
 <br><br>
-#### **Example output** (test_input_output.py file):
-
+#### **Example output** (_input_test_1 and input_test_2_ from test_input_output.py):
+asd
 _Note: this project is a fork of my previous project [gRPCDistributedBankingSimulator](https://github.com/navarro165/gRPCDistributedBankingSimulator) 
 so the sample output here will focus mostly on demonstrating Client-Centric Consistency_.
 
