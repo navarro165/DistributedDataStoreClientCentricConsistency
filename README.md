@@ -1,18 +1,16 @@
-# TODO
+# Client-Centric Consistency Implementation on a gRPC-based Distributed Banking Simulator
 <br>
 
- Simulate a distributed banking system that allows customers to withdraw or deposit money from multiple branches in the bank. The system is able to process concurrent updates on the same resources (money) in the bank, but a single customer is not allowed to access multiple branches at the same time. Each branch maintains a replica of the money that needs to be consistent with the replicas in other branches. The customer communicates with only a specific branch that has the same unique ID as the customer. Although each customer independently updates a specific replica, the replicas stored in each branch need to reflect all the updates made by the customer.
+In this project we simulate a distributed banking system that allows a single customer to be able to withdraw or deposit money from multiple branches in the bank. The main goal is to implement a client-centric consistency model across the system. Client-centric consistency provides guarantees for a single client concerning the consistency of accesses to a data store by that client. In this simulation, the branches are connected to each other and are expected to propagate (via gRPC channels) all **deposit** and **withdraw** transactions from the customers.
 
 <br>
 
-In this simulation, the branches are connected to each other and are expected to propagate (via gRPC channels) all **deposit** and **withdraw** transactions from the customers. 
-A customer has a unique **ID** which matches a one of the branches in this distributed system. Customers are also allowed to query for a balance (which is expected to be in sync across all branches).
-
-
-
-![image info](./topology.png)
+With this model, the customer is be able to execute different write operations across different branches which should then be able to propagate and mantain the correct order of operations. In order to accomplish this, the system enforces consistency by implementing [Monotonic Writes](https://en.wikipedia.org/wiki/Consistency_model#Monotonic_write_consistency) and [Read your Writes](https://en.wikipedia.org/wiki/Consistency_model#Read-your-writes_consistency).
 
 <br>
+
+
+![image info](./diagram.png)
 
 <br>
 
@@ -28,195 +26,298 @@ python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. banking.proto
 
 To test run the system, `cd` into the repository directory and run the following command:<br> `python -m main`
 <br><br>
-**Example output** (test_input_output.py file):
+#### **Example output** (test_input_output.py file):
+
+_Note: this project is a fork of my previous project [gRPCDistributedBankingSimulator](https://github.com/navarro165/gRPCDistributedBankingSimulator) 
+so the sample output here will focus mostly on demonstrating Client-Centric Consistency_.
 
 ```
-Collecting input data...
-	{'id': 1, 'type': 'branch', 'balance': 400}
-	{'id': 2, 'type': 'branch', 'balance': 400}
-	{'id': 3, 'type': 'branch', 'balance': 400}
+DistributedDataStoreClientCentricConsistency git:(master) ✗ python -m main        
 
-Customer Processes:
-	{'id': 1, 'type': 'customer', 'events': [{'id': 1, 'interface': 'query', 'money': 400}]}
-	{'id': 2, 'type': 'customer', 'events': [{'id': 2, 'interface': 'deposit', 'money': 170}, {'id': 3, 'interface': 'query', 'money': 400}]}
-	{'id': 3, 'type': 'customer', 'events': [{'id': 4, 'interface': 'withdraw', 'money': 70}, {'id': 5, 'interface': 'query', 'money': 400}]}
+Starting test 1...
 
-Starting branch processes...
-	- Server started, listening on 50051
-	- Server started, listening on 50052
-	- Server started, listening on 50053
-
-
-
-
-Branch balances (initial balance):
-	- id: 1, balance: 400
-	- id: 2, balance: 400
-	- id: 3, balance: 400
-
-
-
-... STARTING CUSTOMER EVENTS ...
-
-
-
-
-Branch balances (final balance):
-	- id: 1, balance: 500.0
-	- id: 2, balance: 500.0
-	- id: 3, balance: 500.0
-
-
-########################
-	OUTPUT:
-########################
-
-[{'id': 1,
-  'recv': [{'interface': 'query', 'money': 500.0, 'result': 'success'}]},
- {'id': 2,
-  'recv': [{'interface': 'deposit', 'result': 'success'},
-           {'interface': 'query', 'money': 500.0, 'result': 'success'}]},
- {'id': 3,
-  'recv': [{'interface': 'withdraw', 'result': 'success'},
-           {'interface': 'query', 'money': 500.0, 'result': 'success'}]}]
-```
-
-<br>
-
-For debugging, run the command with the `--debug` flag::<br> `python -m main --debug`
-<br><br>
-**Example output** (test_input_output.py file):
-
-```
-> python -m main --debug
 Collecting input data...
 
-Branch Processes:
-	{'id': 1, 'type': 'branch', 'balance': 400}
-	{'id': 2, 'type': 'branch', 'balance': 400}
-	{'id': 3, 'type': 'branch', 'balance': 400}
+Branch Processes: [
+    {
+        "id": 1,
+        "type": "branch",
+        "balance": 0
+    },
+    {
+        "id": 2,
+        "type": "branch",
+        "balance": 0
+    }
+]
 
-Customer Processes:
-	{'id': 1, 'type': 'customer', 'events': [{'id': 1, 'interface': 'query', 'money': 400}]}
-	{'id': 2, 'type': 'customer', 'events': [{'id': 2, 'interface': 'deposit', 'money': 170}, {'id': 3, 'interface': 'query', 'money': 400}]}
-	{'id': 3, 'type': 'customer', 'events': [{'id': 4, 'interface': 'withdraw', 'money': 70}, {'id': 5, 'interface': 'query', 'money': 400}]}
+Customer Processes: [
+    {
+        "id": 1,
+        "type": "customer",
+        "events": [
+            {
+                "interface": "deposit",
+                "money": 400,
+                "id": 1,
+                "dest": 1
+            },
+            {
+                "interface": "withdraw",
+                "money": 400,
+                "id": 2,
+                "dest": 2
+            },
+            {
+                "interface": "query",
+                "id": 3,
+                "dest": 2
+            }
+        ]
+    }
+]
 
 Starting branch processes...
-	- Server started, listening on 50051
-	- Server started, listening on 50052
-	- Server started, listening on 50053
-
-
-
+        - server started, listening on 50051
+        - server started, listening on 50052
 
 Branch balances (initial balance):
-	- id: 1, balance: 400
-	- id: 2, balance: 400
-	- id: 3, balance: 400
-
-
-
-
+        - id: 1, balance: 0
+        - id: 2, balance: 0
 
 ... STARTING CUSTOMER EVENTS ...
+        > branch 1 received deposit from customer 1 for the amount of: $ 400.0
+        > branch 1 adding to writeset event 1
+        ** propagating branch 1 deposit of $400.0 to branches [2]:
+        > branch 2 received deposit from branch 1 for the amount of: $ 400.0
+        > branch 2 adding to writeset event 1
+        > branch 2 balance is $400.0
+        ******************************************************************
+                Validating that all writes have propagated to all branches:
+                > Propagation successful!
+        ******************************************************************
+        > branch 2 received withdraw from customer 1 for the amount of: $ 400.0
+        > branch 2 adding to writeset event 2
+        ** propagating branch 2 withdraw of $400.0 to branches [1]:
+        > branch 1 received withdraw from branch 2 for the amount of: $ 400.0
+        > branch 1 adding to writeset event 2
+        > branch 1 balance is $0.0
+        ******************************************************************
+                Validating that all writes have propagated to all branches:
+                > Propagation successful!
+        ******************************************************************
+        > branch 2 received query from customer 1
+        > branch 2 balance is $0.0
 
-
-Executing customer 1 events...
-
-
-	###################
-	##### QUERY #####
-	###################
-	> branch 1 received query from customer 1
-	> branch 1 balance is $400
-	^ CUSTOMER 1 CONFIRMS THAT BRANCH 1 HAS BALANCE OF 400.0
-
-
-Executing customer 2 events...
-
-
-	###################
-	##### DEPOSIT #####
-	###################
-	> branch 2 received deposit from customer 2 for the amount of: $ 170.0
-
-	******************************************************************
-	*** Propagating branch 2 deposit of $170.0 to branches [1, 3] ***
-
-	> branch 1 received deposit from branch 2 for the amount of: $ 170.0
-	> branch 1 balance is $570.0
-	< branch 2 confirms that branch 1 has new balance of 570.0
-
-	> branch 3 received deposit from branch 2 for the amount of: $ 170.0
-	> branch 3 balance is $570.0
-	< branch 2 confirms that branch 3 has new balance of 570.0
-	******************************************************************
-	^ CUSTOMER 2 CONFIRMS THAT BRANCH 2 HAS NEW BALANCE OF 570.0
-
-
-	###################
-	##### QUERY #####
-	###################
-	> branch 2 received query from customer 2
-	> branch 2 balance is $570.0
-	^ CUSTOMER 2 CONFIRMS THAT BRANCH 2 HAS BALANCE OF 570.0
-
-
-Executing customer 3 events...
-
-
-	###################
-	##### WITHDRAW #####
-	###################
-	> branch 3 received withdraw from customer 3 for the amount of: $ 70.0
-
-	******************************************************************
-	*** Propagating branch 3 withdraw of $70.0 to branches [1, 2] ***
-
-	> branch 1 received withdraw from branch 3 for the amount of: $ 70.0
-	> branch 1 balance is $500.0
-	< branch 3 confirms that branch 1 has new balance of 500.0
-
-	> branch 2 received withdraw from branch 3 for the amount of: $ 70.0
-	> branch 2 balance is $500.0
-	< branch 3 confirms that branch 2 has new balance of 500.0
-	******************************************************************
-	^ CUSTOMER 3 CONFIRMS THAT BRANCH 3 HAS NEW BALANCE OF 500.0
-
-
-	###################
-	##### QUERY #####
-	###################
-	> branch 3 received query from customer 3
-	> branch 3 balance is $500.0
-	^ CUSTOMER 3 CONFIRMS THAT BRANCH 3 HAS BALANCE OF 500.0
-
+Finished executing customer events:
+> Successfully executed write events in the correct order
 
 Waiting 3 sec before wrapping up...
 
+Branch balances (final balance):
+        - id: 1, balance: 0.0
+        - id: 2, balance: 0.0
+
+SANITY CHECK:
+Write sets per branch organized by customer id:
+> ie: {branch_id: {customer_id: [write_event_1, ...]}}
+[
+    {
+        "branch_1": {
+            "1": [
+                1,
+                2
+            ]
+        }
+    },
+    {
+        "branch_2": {
+            "1": [
+                1,
+                2
+            ]
+        }
+    }
+]
+
+SANITY CHECK:
+All events per branch organized by customer id:
+> ie: {branch_id: {customer_id: [event_1, ...]}}
+[
+    {
+        "branch_1": {
+            "1": {
+                "1": {
+                    "interface": "deposit",
+                    "money": 400.0,
+                    "event_id": 1
+                },
+                "2": {
+                    "interface": "withdraw",
+                    "money": 400.0,
+                    "event_id": 2
+                }
+            }
+        }
+    },
+    {
+        "branch_2": {
+            "1": {
+                "1": {
+                    "interface": "deposit",
+                    "money": 400.0,
+                    "event_id": 1
+                },
+                "2": {
+                    "interface": "withdraw",
+                    "money": 400.0,
+                    "event_id": 2
+                },
+                "3": {
+                    "interface": "query",
+                    "money": 0.0,
+                    "event_id": 3
+                }
+            }
+        }
+    }
+]
+
+Output:
+[
+    {
+        "id": 1,
+        "balance": 0.0
+    }
+]
 
 
+Starting test 2...
+
+Collecting input data...
+
+Branch Processes: [
+    {
+        "id": 1,
+        "type": "branch",
+        "balance": 0
+    },
+    {
+        "id": 2,
+        "type": "branch",
+        "balance": 0
+    }
+]
+
+Customer Processes: [
+    {
+        "id": 1,
+        "type": "customer",
+        "events": [
+            {
+                "interface": "deposit",
+                "money": 400,
+                "id": 1,
+                "dest": 1
+            },
+            {
+                "interface": "query",
+                "id": 2,
+                "dest": 2
+            }
+        ]
+    }
+]
+
+Starting branch processes...
+        - server started, listening on 50051
+        - server started, listening on 50052
+
+Branch balances (initial balance):
+        - id: 1, balance: 0
+        - id: 2, balance: 0
+
+... STARTING CUSTOMER EVENTS ...
+        > branch 1 received deposit from customer 1 for the amount of: $ 400.0
+        > branch 1 adding to writeset event 1
+        ** propagating branch 1 deposit of $400.0 to branches [2]:
+        > branch 2 received deposit from branch 1 for the amount of: $ 400.0
+        > branch 2 adding to writeset event 1
+        > branch 2 balance is $400.0
+        ******************************************************************
+                Validating that all writes have propagated to all branches:
+                > Propagation successful!
+        ******************************************************************
+        > branch 2 received query from customer 1
+        > branch 2 balance is $400.0
+
+Finished executing customer events:
+> Successfully executed write events in the correct order
+
+Waiting 3 sec before wrapping up...
 
 Branch balances (final balance):
-	- id: 1, balance: 500.0
-	- id: 2, balance: 500.0
-	- id: 3, balance: 500.0
+        - id: 1, balance: 400.0
+        - id: 2, balance: 400.0
 
+SANITY CHECK:
+Write sets per branch organized by customer id:
+> ie: {branch_id: {customer_id: [write_event_1, ...]}}
+[
+    {
+        "branch_1": {
+            "1": [
+                1
+            ]
+        }
+    },
+    {
+        "branch_2": {
+            "1": [
+                1
+            ]
+        }
+    }
+]
 
+SANITY CHECK:
+All events per branch organized by customer id:
+> ie: {branch_id: {customer_id: [event_1, ...]}}
+[
+    {
+        "branch_1": {
+            "1": {
+                "1": {
+                    "interface": "deposit",
+                    "money": 400.0,
+                    "event_id": 1
+                }
+            }
+        }
+    },
+    {
+        "branch_2": {
+            "1": {
+                "1": {
+                    "interface": "deposit",
+                    "money": 400.0,
+                    "event_id": 1
+                },
+                "2": {
+                    "interface": "query",
+                    "money": 0.0,
+                    "event_id": 2
+                }
+            }
+        }
+    }
+]
 
-
-########################
-	OUTPUT:
-########################
-
-[{'id': 1,
-  'recv': [{'interface': 'query', 'money': 500.0, 'result': 'success'}]},
- {'id': 2,
-  'recv': [{'interface': 'deposit', 'result': 'success'},
-           {'interface': 'query', 'money': 500.0, 'result': 'success'}]},
- {'id': 3,
-  'recv': [{'interface': 'withdraw', 'result': 'success'},
-           {'interface': 'query', 'money': 500.0, 'result': 'success'}]}]
-
-
+Output:
+[
+    {
+        "id": 1,
+        "balance": 400.0
+    }
+]
 ```
