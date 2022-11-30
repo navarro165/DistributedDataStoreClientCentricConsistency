@@ -1,11 +1,14 @@
 # Client-Centric Consistency Implementation on a gRPC-based Distributed Banking Simulator
+
+In this project we simulate a distributed banking system that allows a single customer to be able to withdraw or deposit money from multiple branches in the bank. The main goal is to implement a client-centric consistency model across the system. Client-centric consistency provides guarantees for a single client concerning the consistency of accesses to a data store by that client.
+
 <br>
 
-In this project we simulate a distributed banking system that allows a single customer to be able to withdraw or deposit money from multiple branches in the bank. The main goal is to implement a client-centric consistency model across the system. Client-centric consistency provides guarantees for a single client concerning the consistency of accesses to a data store by that client. In this simulation, the branches are connected to each other and are expected to propagate (via gRPC channels) all **deposit** and **withdraw** transactions from the customers.
+With this model, the customer is able to execute different write operations across different branches which should then be able to propagate and mantain the correct order of operations. In order to accomplish this, the system enforces consistency by implementing [Monotonic Writes](https://en.wikipedia.org/wiki/Consistency_model#Monotonic_write_consistency) and [Read your Writes](https://en.wikipedia.org/wiki/Consistency_model#Read-your-writes_consistency).
 
 <br>
 
-With this model, the customer is be able to execute different write operations across different branches which should then be able to propagate and mantain the correct order of operations. In order to accomplish this, the system enforces consistency by implementing [Monotonic Writes](https://en.wikipedia.org/wiki/Consistency_model#Monotonic_write_consistency) and [Read your Writes](https://en.wikipedia.org/wiki/Consistency_model#Read-your-writes_consistency).
+In this simulation, the branches are connected to each other and are expected to propagate (via gRPC channels) all **deposit** and **withdraw** transactions from the customers.
 
 <br>
 
